@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudVault - Cloud-Based Image Storage and Sharing System</title>
+  <meta name="description" content="A robust, secure, and distributed cloud-based image storage and sharing system with multi-region replication and presigned secure URLs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Cloud Glow Background -->
+  <div class="cloud-ambient-bg">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            <polyline points="12 12 12 16 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">CloudVault</h1>
+          <span class="brand-subtitle">Cloud Image Storage & Sharing Engine</span>
+        </div>
+      </div>
+
+      <!-- Cloud Status Badge -->
+      <div class="header-actions">
+        <div class="cloud-health-badge" id="cloudHealthBadge">
+          <span class="status-dot pulsing"></span>
+          <span>SLA: <strong id="slaText">99.99%</strong></span>
+          <span class="badge-separator">•</span>
+          <span class="latency-indicator" id="latencyDisplay">24ms (us-east-1)</span>
+        </div>
+        <button class="btn btn-secondary btn-icon-text" id="openArchBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Architecture
+        </button>
+        <button class="btn btn-primary" id="triggerUploadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Image
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+    <!-- Cloud Metrics & Storage Dashboard Banner -->
+    <section class="metrics-grid">
+      <div class="metric-card glass-panel">
+        <div class="metric-icon-wrap icon-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Allocated Storage Quota</span>
+          <div class="metric-value-row">
+            <span class="metric-value" id="storageUsedText">0.0 MB</span>
+            <span class="metric-subvalue">/ 500 MB</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="storageProgressBar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon-wrap icon-purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Cloud Objects Stored</span>
+          <div class="metric-value" id="objectCountText">0</div>
+          <span class="metric-hint">Immutable SHA-256 verified</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon-wrap icon-emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Active Presigned Shares</span>
+          <div class="metric-value" id="activeSharesText">0</div>
+          <span class="metric-hint">Expiring & encrypted tokens</span>
+        </div>
+      </div>
+
+      <div class="metric-card glass-panel">
+        <div class="metric-icon-wrap icon-amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Replication Factor</span>
+          <div class="metric-value">3x Active</div>
+          <span class="metric-hint">Cross-region automatic sync</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Zone (Collapsible / Interactive) -->
+    <section class="upload-section glass-panel" id="uploadDrawer">
+      <div class="section-header-compact">
+        <div class="title-with-pill">
+          <h2>Cloud Object Ingestion</h2>
+          <span class="badge badge-cyan">S3 Multi-part Emulation</span>
+        </div>
+        <button class="btn-ghost-sm" id="closeUploadDrawerBtn">✕ Close</button>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        <div class="drop-zone-content">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3>Drag and drop images here or <span class="browse-link">browse files</span></h3>
+          <p class="drop-zone-limits">Supports JPG, PNG, WEBP, GIF, SVG up to 25 MB</p>
+        </div>
+      </div>
+
+      <!-- Upload Configuration Parameters -->
+      <div class="upload-controls-row">
+        <div class="control-group">
+          <label for="primaryRegion">Target Primary Region</label>
+          <select id="primaryRegion" class="custom-select">
+            <option value="us-east-1">🇺🇸 us-east-1 (N. Virginia)</option>
+            <option value="eu-west-1">🇪🇺 eu-west-1 (Ireland)</option>
+            <option value="ap-south-1" selected>🇮🇳 ap-south-1 (Mumbai)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="storageTier">Cloud Storage Class</label>
+          <select id="storageTier" class="custom-select">
+            <option value="STANDARD">STANDARD (Instant Access)</option>
+            <option value="INTELLIGENT_TIERING">INTELLIGENT TIERING (Auto-scale)</option>
+            <option value="GLACIER_INSTANT">GLACIER (Low-cost Archive)</option>
+          </select>
+        </div>
+
+        <div class="control-group flex-1">
+          <label for="imageTags">Object Tags (comma separated)</label>
+          <input type="text" id="imageTags" class="custom-input" placeholder="e.g. Project, Nature, Assets, Production">
+        </div>
+      </div>
+
+      <!-- Upload Queue Visualizer -->
+      <div id="uploadQueueContainer" class="upload-queue" style="display: none;">
+        <h4>Ingestion Queue & Encryption Pipeline</h4>
+        <div id="queueList"></div>
+      </div>
+    </section>
+
+    <!-- Content Toolbar: Search, Region Filter, Tag Filter, View Toggle -->
+    <section class="toolbar-section">
+      <div class="search-bar-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search objects by filename or SHA-256 hash...">
+      </div>
+
+      <div class="filters-row">
+        <!-- Region Filter -->
+        <div class="filter-pill-group" id="regionFilterPills">
+          <button class="pill-btn active" data-region="all">All Regions</button>
+          <button class="pill-btn" data-region="ap-south-1">ap-south-1</button>
+          <button class="pill-btn" data-region="us-east-1">us-east-1</button>
+          <button class="pill-btn" data-region="eu-west-1">eu-west-1</button>
+        </div>
+
+        <!-- Tag Filter Dropdown -->
+        <select id="tagFilterSelect" class="custom-select-sm">
+          <option value="">All Tags</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Images Gallery Grid -->
+    <section class="gallery-container">
+      <div id="imagesGrid" class="images-grid">
+        <!-- Loaded via app.js dynamically -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state-card glass-panel" style="display: none;">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <h3>No Cloud Objects Found</h3>
+        <p>Upload your first high-resolution image to demonstrate cloud storage, checksum verification, and multi-region replication.</p>
+        <button class="btn btn-primary" onclick="CloudVault.openUploadDrawer()">Upload Image Now</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Presigned Sharing Link Generator -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-dialog glass-panel-popup">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle icon-emerald">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </div>
+          <div>
+            <h3>Generate Presigned Share Link</h3>
+            <p class="modal-subtitle">Configure time-limited, encrypted access token</p>
+          </div>
+        </div>
+        <button class="btn-close" id="closeShareModalBtn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="share-object-preview">
+          <img id="shareModalThumb" src="" alt="Thumbnail">
+          <div>
+            <h4 id="shareModalFilename">filename.png</h4>
+            <span class="text-muted" id="shareModalMeta">1.2 MB • ap-south-1</span>
+          </div>
+        </div>
+
+        <form id="createShareForm" class="share-form">
+          <input type="hidden" id="shareTargetImageId">
+          <div class="form-row">
+            <label for="shareExpiry">Access Expiration</label>
+            <select id="shareExpiry" class="custom-select">
+              <option value="1">1 Hour (High Security)</option>
+              <option value="24" selected>24 Hours (Standard)</option>
+              <option value="168">7 Days (Extended)</option>
+              <option value="0">Never (Public Persistent)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="sharePassword">Optional Access Passcode</label>
+            <input type="password" id="sharePassword" class="custom-input" placeholder="Leave empty for public link">
+          </div>
+
+          <div class="form-checkbox-row">
+            <input type="checkbox" id="shareAllowDownload" checked>
+            <label for="shareAllowDownload">Allow recipient to download raw binary file</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Generate Secure Link</button>
+        </form>
+
+        <!-- Result Container -->
+        <div id="shareResultBlock" class="share-result" style="display: none;">
+          <div class="divider"></div>
+          <label>Generated Presigned URL</label>
+          <div class="copy-url-group">
+            <input type="text" id="generatedShareUrl" readonly class="custom-input share-url-input">
+            <button class="btn btn-secondary" id="copyShareUrlBtn">Copy</button>
+          </div>
+
+          <!-- Canvas QR Code generator -->
+          <div class="qr-code-section">
+            <canvas id="qrCanvas" width="140" height="140"></canvas>
+            <span class="qr-caption">Scan QR code for direct mobile access</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Fullscreen Image Details & Lightbox Inspector -->
+  <div class="modal-overlay" id="lightboxModal">
+    <div class="lightbox-dialog glass-panel-popup">
+      <button class="lightbox-close-btn" id="closeLightboxBtn">✕</button>
+      <div class="lightbox-layout">
+        <div class="lightbox-image-viewer">
+          <img id="lightboxImg" src="" alt="Cloud Object Display">
+        </div>
+        <div class="lightbox-metadata-sidebar">
+          <div class="sidebar-header">
+            <span class="badge badge-purple" id="lbStorageClass">STANDARD</span>
+            <h3 id="lbFilename">image_title.png</h3>
+            <span class="text-muted" id="lbUploadDate">Uploaded Oct 25, 2026</span>
+          </div>
+
+          <div class="metadata-table">
+            <div class="meta-row">
+              <span class="meta-k">Object ID:</span>
+              <span class="meta-v mono" id="lbId">-</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-k">File Size:</span>
+              <span class="meta-v" id="lbSize">-</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-k">MIME Type:</span>
+              <span class="meta-v mono" id="lbMime">-</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-k">Primary Region:</span>
+              <span class="meta-v" id="lbRegion">-</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-k">SHA-256 Checksum:</span>
+              <span class="meta-v mono checksum-text" id="lbChecksum">-</span>
+            </div>
+          </div>
+
+          <!-- Replication Visualizer -->
+          <div class="replication-box">
+            <h4>Cloud Replication Zones</h4>
+            <div class="replication-badges" id="lbReplicationBadges">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Tags List -->
+          <div class="tags-container">
+            <h4>Classification Tags</h4>
+            <div class="tags-list" id="lbTags"></div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="lightbox-actions">
+            <button class="btn btn-primary" id="lbShareBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share
+            </button>
+            <a id="lbDownloadBtn" class="btn btn-secondary" download>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </a>
+            <button class="btn btn-danger-ghost" id="lbDeleteBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Cloud Computing Architecture & System Documentation -->
+  <div class="modal-overlay" id="archModal">
+    <div class="modal-dialog glass-panel-popup arch-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div>
+            <h3>Cloud Architecture & Academic Overview</h3>
+            <p class="modal-subtitle">Concepts demonstrated in this Cloud Computing project</p>
+          </div>
+        </div>
+        <button class="btn-close" id="closeArchModalBtn">✕</button>
+      </div>
+      <div class="modal-body arch-content">
+        <div class="arch-card">
+          <h4>1. Cloud Object Storage Model (AWS S3 Architecture)</h4>
+          <p>Unlike hierarchical POSIX filesystems, this system stores images as unique immutable objects keyed by UUIDs. Metadata (size, MIME type, cryptographic checksum, tags) is maintained independently in an ACID-compliant metadata catalog (SQLite database), separating data plane from control plane.</p>
+        </div>
+        <div class="arch-card">
+          <h4>2. Multi-Region Replication (Active-Active Fault Tolerance)</h4>
+          <p>When an object is uploaded to a primary region (e.g., <code>ap-south-1</code>), it automatically triggers replication routines across distributed availability zones (<code>us-east-1</code>, <code>eu-west-1</code>), ensuring high availability (99.99%) and disaster recovery.</p>
+        </div>
+        <div class="arch-card">
+          <h4>3. Presigned URLs & Zero-Trust Tokenized Access</h4>
+          <p>Implements temporary presigned authorization tokens with configurable expiration windows and optional SHA-256 password hashing. External clients can view or download assets without possessing direct database or storage credentials.</p>
+        </div>
+        <div class="arch-card">
+          <h4>4. Data Integrity & Cryptographic Checksums</h4>
+          <p>Every payload computes a SHA-256 digest upon byte transmission to guarantee tamper resistance and bit-rot prevention in transit and at rest.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Public Shared Link Interceptor (if visited via ?share=token) -->
+  <div class="modal-overlay" id="publicShareModal">
+    <div class="modal-dialog glass-panel-popup share-viewer-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle icon-cyan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div>
+            <h3 id="publicShareTitle">Cloud Vault Shared Asset</h3>
+            <p class="modal-subtitle">Secure cloud presigned download link</p>
+          </div>
+        </div>
+        <button class="btn-close" onclick="window.location.href='/'">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Password prompt if protected -->
+        <div id="publicPasswordPrompt" style="display: none;">
+          <p class="warning-text">🔒 This shared object is password-protected by the owner.</p>
+          <div class="form-row">
+            <input type="password" id="publicPasscodeInput" class="custom-input" placeholder="Enter link passcode">
+            <button class="btn btn-primary" id="submitPublicPassBtn">Unlock</button>
+          </div>
+        </div>
+
+        <div id="publicShareContent" style="display: none;">
+          <div class="public-preview-box">
+            <img id="publicSharedImg" src="" alt="Shared Image">
+          </div>
+          <div class="public-meta-bar">
+            <div>
+              <strong id="publicSharedFilename">filename.png</strong>
+              <div class="text-muted" id="publicSharedSize">Size: 2.4 MB</div>
+            </div>
+            <a id="publicDownloadBtn" class="btn btn-primary" download>Download Image</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
